@@ -307,7 +307,7 @@ def popula_paradas(request):
                     name = item['np']
                     latitude = item['py']
                     longitude = item['px']
-                    print(id, name, latitude, longitude)
+                    # print(id, name, latitude, longitude)
 
                     if not Parada.objects.filter(id=id):
                         parada = Parada(id=id, name=name, latitude=latitude, longitude=longitude)
@@ -353,7 +353,6 @@ def popula_veiculos(request):
     atualizado = 0
 
     for i in range (len(veiculos)):
-
         for j in range (len(veiculos[i]['vs'])):
             print(f'{veiculos[i]["c"]}, {veiculos[i]["cl"]}, {veiculos[i]["vs"][j]["p"]}')
             prefixo_veiculo = veiculos[i]["vs"][j]["p"]
@@ -364,10 +363,10 @@ def popula_veiculos(request):
                 novoveiculo.save()
                 novo += 1
             else:
-                atualiza_veiculo = Veiculo.objects.filter(id=prefixo_veiculo)
+                atualiza_veiculo = Veiculo.objects.get(id=prefixo_veiculo)
                 atualiza_veiculo.name = name
                 atualiza_veiculo.linha_id = linha_id
-                atualiza_veiculo.update()
+                atualiza_veiculo.save()
                 atualizado += 1
 
     messages.success(request, f'Foram inseridos {novo} Veículos novos e feito {atualizado} atualizações.')
