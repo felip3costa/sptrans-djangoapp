@@ -270,77 +270,87 @@ def editar_veiculo(request):
 
         return redirect('busca_veiculo')
 
-def localizar_veiculo(request, linha):
-    posicao = posicao_por_linha(linha)
-    titulo_pagina = 'Veículos Cadastradas'
-    dados = {'titulo_pagina': titulo_pagina,
-             'posicao': posicao}
-    return render(request, 'pages/localiza_veiculo.html', context=dados)
-
 
 # Funções e Conectando na API
 def posicao_por_linha(linha):
     posicao = ConectaSPTRANS().posicao_por_linha(linha)['vs']
     return posicao
 
-def popula_linhas():
+def popula_linhas(request):
     veiculos = ConectaSPTRANS().posicao
     veiculos = veiculos['l']
+    novas = 0
 
     for veiculo in veiculos:
         linha = veiculo['cl']
         name = veiculo['c']
 
-        if not Linha.objects.filter(linha=linha) and not Linha.objects.filter(name=name):
+        if not Linha.objects.filter(name=name):
             novo_veiculo = Linha(linha=linha, name=name)
             novo_veiculo.save()
-        else:
-            try:
-                update_veiculo = Linha.objects.get(linha=linha)
-                update_veiculo.name = name
-            except:
-                update_veiculo = Linha.objects.get(name=name)
-                update_veiculo.linha = linha
-            update_veiculo.save()
+            novas += 1
+    print(novas)
 
-def popula_paradas(linhas):
-    linhas = linhas
+    messages.success(request, f'Foram inseridas {novas} Linhas novas.')
+    return redirect('home')
+
+def popula_paradas(request):
+    linhas = carrega_linhas()
+    novas = 0
+    atualizada = 0
     for linha in linhas:
         paradas = ConectaSPTRANS().busca_parada(linha)
         if paradas:
             for item in paradas:
-                id = item['cp']
-                name = item['np']
-                latitude = item['py']
-                longitude = item['px']
-                print(id, name, latitude, longitude)
+                try:
+                    id = item['cp']
+                    name = item['np']
+                    latitude = item['py']
+                    longitude = item['px']
+                    print(id, name, latitude, longitude)
 
-                if not Parada.objects.filter(id=id):
-                    parada = Parada(id=id, name=name, latitude=latitude, longitude=longitude)
-                    parada.save()
-                else:
-                    parada = Parada.objects.get(id=id)
-                    parada.name = name
-                    parada.latitude = latitude
-                    parada.longitude = longitude
-                    parada.save()
+                    if not Parada.objects.filter(id=id):
+                        parada = Parada(id=id, name=name, latitude=latitude, longitude=longitude)
+                        parada.save()
+                        novas += 1
+                    else:
+                        parada = Parada.objects.get(id=id)
+                        parada.name = name
+                        parada.latitude = latitude
+                        parada.longitude = longitude
+                        parada.save()
+                        atualizada += 1
+                except:
+                    pass
 
-def popula_ppl(linhas):
-    linhas = linhas
+    messages.success(request, f'Foram inseridas {novas} Paradas novas e feito {atualizada} atualizações.')
+    return redirect('home')
+
+def popula_ppl(request):
+    linhas = carrega_linhas()
+    nova = 0
     for linha in linhas:
         paradas = ConectaSPTRANS().busca_parada(linha)
         if paradas:
             for item in paradas:
-                codigo_parada = item['cp']
-                if Linha.objects.filter(linha=linha):
-                    if Parada.objects.filter(id=codigo_parada):
-                        if not ParadaPorLinha.objects.filter(linha=linha, parada=codigo_parada):
-                            paradaporlinha = ParadaPorLinha(linha_id=linha, parada_id=codigo_parada)
-                            paradaporlinha.save()
+                try:
+                    codigo_parada = item['cp']
+                    if Linha.objects.filter(linha=linha):
+                        if Parada.objects.filter(id=codigo_parada):
+                            if not ParadaPorLinha.objects.filter(linha=linha, parada=codigo_parada):
+                                paradaporlinha = ParadaPorLinha(linha_id=linha, parada_id=codigo_parada)
+                                paradaporlinha.save()
+                                nova += 1
+                except:
+                    pass
+    messages.success(request, f'Foram feitas {nova} novas conexões')
+    return redirect('home')
 
-def popula_veiculos():
+def popula_veiculos(request):
     veiculos = ConectaSPTRANS().posicao
     veiculos = veiculos['l']
+    novo = 0
+    atualizado = 0
 
     for i in range (len(veiculos)):
 
@@ -352,11 +362,16 @@ def popula_veiculos():
             if not Veiculo.objects.filter(id=prefixo_veiculo):
                 novoveiculo = Veiculo(id=prefixo_veiculo, name=name, linha_id=linha_id)
                 novoveiculo.save()
+                novo += 1
             else:
                 atualiza_veiculo = Veiculo.objects.filter(id=prefixo_veiculo)
                 atualiza_veiculo.name = name
                 atualiza_veiculo.linha_id = linha_id
                 atualiza_veiculo.update()
+                atualizado += 1
+
+    messages.success(request, f'Foram inseridos {novo} Veículos novos e feito {atualizado} atualizações.')
+    return redirect('home')
 
 def carrega_linhas():
     veiculos = ConectaSPTRANS().posicao
@@ -365,7 +380,7 @@ def carrega_linhas():
 
     return linhas
 
-def carrega_empresa():
-    empresas = ConectaSPTRANS().busca_empresas
-    print (empresas)
+# def carrega_empresa():
+#     empresas = ConectaSPTRANS().busca_empresas
+#     print (empresas)
 

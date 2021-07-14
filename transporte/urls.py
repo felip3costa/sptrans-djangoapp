@@ -24,5 +24,10 @@ urlpatterns = [
     path('editando_veiculo/<int:id>', views.editando_veiculo, name='editando_veiculo'),
     path('editar_veiculo', views.editar_veiculo, name='editar_veiculo'),
     path('criar_veiculo', views.criar_veiculo, name='criar_veiculo'),
-    path('localizar_veiculo/<int:linha>', views.localizar_veiculo, name='localizar_veiculo'),
+
+    path('popula_linhas', views.popula_linhas, name='popula_linhas'),
+    path('popula_paradas', views.popula_paradas, name='popula_paradas'),
+    path('popula_ppl', views.popula_ppl, name='popula_ppl'),
+    path('popula_veiculos', views.popula_veiculos, name='popula_veiculos'),
+
 ]

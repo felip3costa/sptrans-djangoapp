@@ -17,7 +17,7 @@
     <tbody>
     {% for veiculo in veiculos %}
         <tr>
-        <th scope="row"><a href="{% url 'localizar_veiculo' veiculo.linha_id %}">{{ veiculo.id }}</a></th>
+        <th scope="row">{{ veiculo.id }}</th>
         <td>{{ veiculo.name }}</td>
         <td>{{ veiculo.linha_id }}</td>
         <td>{{ veiculo.modelo }}</td>
